@@ -66,6 +66,31 @@ int _write(int file, char *ptr, int len)
   HAL_UART_Transmit(&huart1, ptr, len,5);
   return  len;
 }
+
+void CanSend()
+{
+	CAN_TxHeaderTypeDef   TxHeader;
+	CAN_RxHeaderTypeDef   RxHeader;
+	uint8_t               TxData[8];
+	uint8_t               RxData[8];
+	uint32_t              TxMailbox;
+	  /*##-4- Start the Transmission process #####################################*/
+	  TxHeader.StdId = 0x11;
+	  TxHeader.RTR = CAN_RTR_DATA;
+	  TxHeader.IDE = CAN_ID_STD;
+	  TxHeader.DLC = 2;
+	  TxHeader.TransmitGlobalTime = DISABLE;
+	  TxData[0] = 0xCA;
+	  TxData[1] = 0xFE;
+
+	  /* Request transmission */
+	//  if(HAL_CAN_AddTxMessage(hcan, TxHeader, aData, pTxMailbox)(hcan, TxMailboxes), TxMailboxes))
+	  if(HAL_CAN_AddTxMessage(&hcan, &TxHeader, &TxData, &TxMailbox) != HAL_OK)
+	  {
+	    /* Transmission request Error */
+		  printf("can send error\n");
+	  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -105,11 +130,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_Delay(1000);
+  if (HAL_CAN_Start(&hcan) != HAL_OK)
+    {
+      /* Start Error */
+	  printf("can start error\n");
+    }
+  else{
+	  printf("can start ok!!!!!\n");
+  }
   while (1)
   {
 
-	  printf("adc=%d\n",123);
-	  HAL_Delay(100);
+	 // printf("adc=%d\n",123);
+	 CanSend();
+	  HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -164,7 +199,15 @@ static void MX_CAN_Init(void)
 {
 
   /* USER CODE BEGIN CAN_Init 0 */
-
+//	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+//	  GPIO_InitStruct.Pin = GPIO_PIN_11;
+//	  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;//GPIO_MODE_AF_PP
+//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//	  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+//
+//	  GPIO_InitStruct.Pin = GPIO_PIN_12;
+//	  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;//
+//	  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   /* USER CODE END CAN_Init 0 */
 
   /* USER CODE BEGIN CAN_Init 1 */
@@ -174,8 +217,8 @@ static void MX_CAN_Init(void)
   hcan.Init.Prescaler = 16;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_1TQ;
-  hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
+  hcan.Init.TimeSeg1 = CAN_BS1_3TQ;
+  hcan.Init.TimeSeg2 = CAN_BS2_5TQ;
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
@@ -187,7 +230,16 @@ static void MX_CAN_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN_Init 2 */
+  CAN_FilterTypeDef sFilterConfig; //declare CAN filter structure
+  sFilterConfig.FilterFIFOAssignment=CAN_FILTER_FIFO0; //set fifo assignment
+  	sFilterConfig.FilterIdHigh=0x245<<5; //the ID that the filter looks for (switch this for the other microcontroller)
+  	sFilterConfig.FilterIdLow=0;
+  	sFilterConfig.FilterMaskIdHigh=0;
+  	sFilterConfig.FilterMaskIdLow=0;
+  	sFilterConfig.FilterScale=CAN_FILTERSCALE_32BIT; //set filter scale
+  	sFilterConfig.FilterActivation=ENABLE;
 
+  	HAL_CAN_ConfigFilter(&hcan, &sFilterConfig); //configure CAN filter
   /* USER CODE END CAN_Init 2 */
 
 }
@@ -265,10 +317,18 @@ static void MX_USART2_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin : PB11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
