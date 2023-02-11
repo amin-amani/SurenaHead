@@ -48,7 +48,7 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+int ServPosition =0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +64,7 @@ static void MX_TIM1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//===========================================================================================================
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	uint8_t               RxData[8];
@@ -72,6 +73,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 //	  printf("header=%x",RxHeader);
 	  CanSend(0x12);
 }
+//===========================================================================================================
 void canirq(CAN_HandleTypeDef *hcan)
 {
 	uint8_t               RxData[8];
@@ -80,16 +82,29 @@ void canirq(CAN_HandleTypeDef *hcan)
 //	  printf("header=%x",RxHeader);
 	  CanSend(0x12);
 }
+//===========================================================================================================
 int _write(int file, char *ptr, int len)
 {
-  HAL_UART_Transmit(&huart1, ptr, len,5);
+  HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len,5);
   return  len;
 }
+//===========================================================================================================
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 {
+	static int value=0;
+//	 GPIOB->ODR^=(1<<7);
 // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	  GPIOB->ODR^=1<<7;
+	if(value<ServPosition)
+
+	 GPIOB->ODR|=(1<<7);
+	 else
+		 GPIOB->ODR&=~(1<<7);
+
+	if(value++ > 3990)value=0;
+
+
 }
+//===========================================================================================================
 void CanSend(uint32_t id)
 {
 	CAN_TxHeaderTypeDef   TxHeader;
@@ -114,6 +129,7 @@ void CanSend(uint32_t id)
 		  printf("can send error\n");
 	  }
 }
+//===========================================================================================================
 /* USER CODE END 0 */
 
 /**
@@ -172,7 +188,19 @@ int main(void)
   {
 
 	  printf("can reg=%x\n",CAN1->MSR);
-	  HAL_Delay(400);
+	  HAL_Delay(300);
+	  ServPosition=200;
+	  HAL_Delay(1000);
+	  ServPosition=400;//+300
+	  HAL_Delay(1000);
+	  ServPosition=500;//+300
+		  HAL_Delay(1000);
+
+
+
+
+
+
 
 
 
@@ -289,7 +317,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 359;
+  htim1.Init.Prescaler = 179;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
