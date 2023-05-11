@@ -83,8 +83,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	uint8_t               RxData[8];
 	CAN_RxHeaderTypeDef   RxHeader;
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-	  printf("header=%d",RxData[0]);
-
+//	  printf("header=%d",RxData[0]);
+	if(RxHeader.StdId!=0x281)return;
 	  SetServoPosition(RxData);
 //	  CanSend(0x12);
 }
@@ -113,12 +113,12 @@ int _write(int file, char *ptr, int len)
 }
 bool status=0;
 int value[2]={420,7600};
-void SetServoValue(int command)
-{
-//	if(command>420)command=420;
-	value[0]=420+command;
-	value[1]=8000-value[0];
-}
+//void SetServoValue(int command)
+//{
+////	if(command>420)command=420;
+//	value[0]=420+command;
+//	value[1]=8000-value[0];
+//}
 //===========================================================================================================
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 {
@@ -229,27 +229,6 @@ int main(void)
 	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   while (1)
   {
-//TIM4->CCR2=50+ServPosition;
-//HAL_Delay(10);
-//if(direction){
-//	ServPosition++;
-//	if(ServPosition>190)direction=false;
-//}
-//else
-//{
-//	ServPosition--;
-//	if(ServPosition<1)direction=true;
-//}
-//
-//
-
-
-
-
-
-
-
-
 
     /* USER CODE END WHILE */
 
