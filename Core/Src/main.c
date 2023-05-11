@@ -43,6 +43,7 @@
 CAN_HandleTypeDef hcan;
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
@@ -61,30 +62,41 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void SetServoPosition(uint8_t  *position)
+{
+
+	TIM4->CCR1=50+((position[0]>190)?190:position[0]);
+	TIM4->CCR2=50+((position[1]>190)?190:position[1]);
+	TIM3->CCR2=50+((position[2]>190)?190:position[2]);
+
+}
 //===========================================================================================================
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	uint8_t               RxData[8];
 	CAN_RxHeaderTypeDef   RxHeader;
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-//	  printf("header=%x",RxHeader);
-	  CanSend(0x12);
+	  printf("header=%d",RxData[0]);
+
+	  SetServoPosition(RxData);
+//	  CanSend(0x12);
 }
 //===========================================================================================================
-void canirq(CAN_HandleTypeDef *hcan)
-{
-	uint8_t               RxData[8];
-	CAN_RxHeaderTypeDef   RxHeader;
-	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-//	  printf("header=%x",RxHeader);
-	  CanSend(0x12);
-}
+//void canirq(CAN_HandleTypeDef *hcan)
+//{
+//	uint8_t               RxData[8];
+//	CAN_RxHeaderTypeDef   RxHeader;
+//	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
+////	  printf("header=%x",RxHeader);
+//	  CanSend(0x12);
+//}
 //===========================================================================================================
 //int _write(int file, char *ptr, int len)
 //{
@@ -128,6 +140,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 
 
 }
+
+
 //===========================================================================================================
 void CanSend(uint32_t id)
 {
@@ -189,6 +203,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM4_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -210,21 +225,23 @@ int main(void)
 	 CanSend(0x11);
 //	 HAL_TIM_Base_Start_IT(&htim1);
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   while (1)
   {
-TIM4->CCR2=50+ServPosition;
-HAL_Delay(10);
-if(direction){
-	ServPosition++;
-	if(ServPosition>190)direction=false;
-}
-else
-{
-	ServPosition--;
-	if(ServPosition<1)direction=true;
-}
-
-
+//TIM4->CCR2=50+ServPosition;
+//HAL_Delay(10);
+//if(direction){
+//	ServPosition++;
+//	if(ServPosition>190)direction=false;
+//}
+//else
+//{
+//	ServPosition--;
+//	if(ServPosition<1)direction=true;
+//}
+//
+//
 
 
 
@@ -375,6 +392,55 @@ static void MX_TIM1_Init(void)
 }
 
 /**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 720;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 2000;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 100;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
+
+}
+
+/**
   * @brief TIM4 Initialization Function
   * @param None
   * @retval None
@@ -421,6 +487,11 @@ static void MX_TIM4_Init(void)
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 100;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
   sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
