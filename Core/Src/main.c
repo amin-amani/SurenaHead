@@ -50,7 +50,7 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-int ServPosition =0;
+int32_t ServPosition =0,dummy=0;
 bool direction=true;
 uint8_t zeroValues[3]={100,100,100};
 /* USER CODE END PV */
@@ -70,12 +70,20 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void SetServoPosition(uint8_t  *position)
+void SetServoPositions(uint8_t  *position)
 {
 
 	TIM4->CCR1=position[0];//50+((position[0]>190)?190:position[0]);
 	TIM4->CCR2=position[1];//50+((position[1]>190)?190:position[1]);
 	TIM3->CCR2=position[2];//50+((position[2]>190)?190:position[2]);
+
+}
+void SetServoPosition(int index ,uint8_t  position)
+{
+
+if(index==0)        TIM4->CCR1=position;//50+((position[0]>190)?190:position[0]);
+else if(index==1)	TIM4->CCR2=position;//50+((position[1]>190)?190:position[1]);
+else	            TIM3->CCR2=position;//50+((position[2]>190)?190:position[2]);
 
 }
 //===========================================================================================================
@@ -86,7 +94,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
 //	  printf("header=%d",RxData[0]);
 	if(RxHeader.StdId!=0x281)return;
-	  SetServoPosition(RxData);
+	  SetServoPositions(RxData);
 //	  CanSend(0x12);
 }
 //===========================================================================================================
@@ -124,11 +132,15 @@ int value[2]={420,7600};
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 {
 
-
+if(dummy++ %100000!=0)return;
+ServPosition++;
+printf("pos=%d\n",ServPosition);
 //	 GPIOB->ODR^=(1<<7);
 //	 TIM1->ARR=value[status];
 //	 status=!status;
-
+//SetServoPosition(0, ServPosition);
+//SetServoPosition(1, ServPosition);
+//SetServoPosition(2, ServPosition);
 
 // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 //	if(value<ServPosition)
@@ -228,10 +240,31 @@ int main(void)
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-	 SetServoPosition(zeroValues);
+	 //SetServoPosition(zeroValues);
+	 ServPosition=100;
+	 direction=true;
   while (1)
   {
 
+
+	  HAL_Delay(10);
+
+	  if(direction)ServPosition++;
+	  else ServPosition--;
+
+	  if(ServPosition>250)direction=false;
+	  if(ServPosition<40)direction=true;
+
+	  SetServoPosition(0, ServPosition);
+	  SetServoPosition(1, ServPosition);
+	  SetServoPosition(2, ServPosition);
+//	  	if(value<ServPosition)
+//
+//	  	 GPIOB->ODR|=(1<<7);
+//	  	 else
+//	  		 GPIOB->ODR&=~(1<<7);
+//
+//	  	if(value++ > 3990)value=0;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
