@@ -52,6 +52,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 int ServPosition =0;
 bool direction=true;
+uint8_t zeroValues[3]={100,100,100};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,9 +73,9 @@ static void MX_TIM3_Init(void);
 void SetServoPosition(uint8_t  *position)
 {
 
-	TIM4->CCR1=50+((position[0]>190)?190:position[0]);
-	TIM4->CCR2=50+((position[1]>190)?190:position[1]);
-	TIM3->CCR2=50+((position[2]>190)?190:position[2]);
+	TIM4->CCR1=position[0];//50+((position[0]>190)?190:position[0]);
+	TIM4->CCR2=position[1];//50+((position[1]>190)?190:position[1]);
+	TIM3->CCR2=position[2];//50+((position[2]>190)?190:position[2]);
 
 }
 //===========================================================================================================
@@ -227,6 +228,7 @@ int main(void)
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+	 SetServoPosition(zeroValues);
   while (1)
   {
 
