@@ -57,7 +57,7 @@ uint8_t zeroValues[3]={150,150,150};
 
 int LedBrightness=1;
 
-#define MAX_LED 24
+#define MAX_LED 48//24
 #define USE_BRIGHTNESS 1
 #define PI 3.14159265
 
@@ -312,7 +312,7 @@ int main(void)
   else{
 	  printf("can start ok!!!!!\n");
   }
-  for (int i=0; i<3; i++){
+  for (int i=0; i<6; i++){
   Set_LED(8*i+0, 0, 0, 255);
    Set_LED(8*i+1, 0, 0, 255);
    Set_LED(8*i+2, 0, 0, 255);
@@ -336,14 +336,6 @@ int main(void)
   while (1)
   {
 
-
-//		 CanSend(0x11);
-//		 HAL_Delay(400);
-//		  printf(" ok!!!!!\n");
-//
-//	  uint8_t
-
-
 	  if(direction)LedBrightness++;
 	  else LedBrightness--;
 	  if(LedBrightness>45)direction=false;
@@ -353,23 +345,6 @@ int main(void)
 	  WS2812_Send();
 
 	  HAL_Delay (100);
-
-//		  for (int i=45; i>=0; i--)
-//		  {
-//			  Set_Brightness(i);
-//			  WS2812_Send();
-//			  HAL_Delay (50);
-//		  }
-
-//	  if(direction)ServPosition++;
-//	  else ServPosition--;
-//
-//	  if(ServPosition>250)direction=false;
-//	  if(ServPosition<60)direction=true;
-//
-//	  SetServoPosition(0, ServPosition);
-//	  SetServoPosition(1, ServPosition);
-//	  SetServoPosition(2, ServPosition);
 
     /* USER CODE END WHILE */
 
