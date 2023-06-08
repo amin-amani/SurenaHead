@@ -52,7 +52,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 int32_t ServPosition =0,dummy=0;
 bool direction=true;
-uint8_t zeroValues[3]={100,100,100};
+uint8_t zeroValues[3]={150,150,150};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,10 +72,10 @@ static void MX_TIM3_Init(void);
 /* USER CODE BEGIN 0 */
 void SetServoPositions(uint8_t  *position)
 {
-
-	TIM4->CCR1=position[0];//50+((position[0]>190)?190:position[0]);
-	TIM4->CCR2=position[1];//50+((position[1]>190)?190:position[1]);
-	TIM3->CCR2=position[2];//50+((position[2]>190)?190:position[2]);
+	printf("r= %d %d %d \n",(uint32_t)position[0],(uint32_t)position[1],(uint32_t)position[2]);
+	TIM4->CCR1=(uint32_t)position[0];//50+((position[0]>190)?190:position[0]);
+	TIM4->CCR2=(uint32_t)position[1];//50+((position[1]>190)?190:position[1]);
+	TIM3->CCR2=(uint32_t)position[2];//50+((position[2]>190)?190:position[2]);
 
 }
 void SetServoPosition(int index ,uint8_t  position)
@@ -92,10 +92,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	uint8_t               RxData[8];
 	CAN_RxHeaderTypeDef   RxHeader;
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-//	  printf("header=%d",RxData[0]);
+//	printf("%d %d %d %d \n",RxHeader.StdId,RxData[0],RxData[1],RxData[2]);
 	if(RxHeader.StdId!=0x281)return;
+
 	  SetServoPositions(RxData);
-//	  CanSend(0x12);
+
 }
 //===========================================================================================================
 //void canirq(CAN_HandleTypeDef *hcan)
@@ -223,8 +224,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_Delay(1000);
-
+  HAL_Delay(400);
+  HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
   if (HAL_CAN_Start(&hcan) != HAL_OK)
     {
       /* Start Error */
@@ -233,38 +234,37 @@ int main(void)
   else{
 	  printf("can start ok!!!!!\n");
   }
- HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
   HAL_Delay(3000);
 	 CanSend(0x11);
 //	 HAL_TIM_Base_Start_IT(&htim1);
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 	 HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-	 //SetServoPosition(zeroValues);
-	 ServPosition=100;
-	 direction=true;
+	 SetServoPositions(zeroValues);
+
   while (1)
   {
 
 
-	  HAL_Delay(10);
-
-	  if(direction)ServPosition++;
-	  else ServPosition--;
-
-	  if(ServPosition>250)direction=false;
-	  if(ServPosition<40)direction=true;
-
-	  SetServoPosition(0, ServPosition);
-	  SetServoPosition(1, ServPosition);
-	  SetServoPosition(2, ServPosition);
-//	  	if(value<ServPosition)
+//		 CanSend(0x11);
+//		 HAL_Delay(400);
+//		  printf(" ok!!!!!\n");
 //
-//	  	 GPIOB->ODR|=(1<<7);
-//	  	 else
-//	  		 GPIOB->ODR&=~(1<<7);
+//	  uint8_t
+	  HAL_Delay(2000);
+	  HAL_UART_Transmit(&huart1,"200\r\n", 5,5);
+
+//	  if(direction)ServPosition++;
+//	  else ServPosition--;
 //
-//	  	if(value++ > 3990)value=0;
+//	  if(ServPosition>250)direction=false;
+//	  if(ServPosition<60)direction=true;
+//
+//	  SetServoPosition(0, ServPosition);
+//	  SetServoPosition(1, ServPosition);
+//	  SetServoPosition(2, ServPosition);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -295,6 +295,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -534,7 +535,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -592,6 +593,8 @@ static void MX_USART2_UART_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -604,6 +607,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -641,5 +646,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
