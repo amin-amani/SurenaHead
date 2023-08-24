@@ -84,7 +84,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	uint8_t               RxData[8];
 	CAN_RxHeaderTypeDef   RxHeader;
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-//	  printf("header=%d",RxData[0]);
+//  printf("header=%d \n",RxData[0]);
 	if(RxHeader.StdId!=0x281)return;
 	  SetServoPosition(RxData);
 //	  CanSend(0x12);
