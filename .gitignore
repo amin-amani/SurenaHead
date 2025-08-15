@@ -1,55 +1,125 @@
-Debug/
-# Prerequisites
-*.d
+build-*
+firmware/build/
+firmware/.settings/language.settings.xml
+*.prefs
+# Altium Designer files
+*.PrjPCBStructure
+*.SchDocPreview
+*.PcbDocPreview
+__Previews/
+*.PrjPcbStructure
+*.Dat
+*.REP 
+*.TLT
+*.LOG
+*.log
+*.htm
+History/
+Project Logs*/
+Project Outputs*/
+**/History
+*.PrjPCBStructure
+*.SchDocPreview
+*.PcbDocPreview
+*.$$$
+*.BOM
+*.OutJob
+*.pdf
+*.CSV
+*.csv
+*.html
+*.HTML
+*.PrjPcbVariants
+*.PrjPcbSettings
+*.PrjPCBSettings
+*.PrjMbdStructure
+*.PrjPCBStructure
+*.PrjScr
+*.apr
+*.DRC
+*.drc
+*.html
+*.apr
+*.APR
+*.DXF
+*.EXTREP
+*.GBR
+*.GKO
+*.GPB
+*.GTP
+*.GTS
+*.REP
+*.RUL
+*.user.prefs
+*.NET
+*.xlsx
+*.zip
+*.rar
+*.7z
+*.bak
+# PDN Analyzer
+PDNAnalyzer_Output/
 
-# Object files
+# Firmware/IDE files
 *.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
+*.d
+*.crf
+*.dep
 *.map
-*.exp
-*.ld
-*.mxproject
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
+*.bak
+*.lst
+*.i
+*.obj
+*.iex
+*.pbi
+*.cout
+*.pbd
+*.browse
+*.tmp
+*.ewt
+*.ewd
+*.cspy.bat
+*.cspy.ps1
+*.dbgdt
+*.dnx
+*.wsdt
+*.dbgconf
+*.jlink
+*.axf
 *.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
+*.bin
+*.elf
+*.a
+*.lib
+*.out
+*.sim
 *.pdb
+*.ilk
+*.idb
+*.pch
+*.ncb
+*.opt
+*.plg
+*.bsc
+*.sbr
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+Debug/
+Release/
+.vs/
+__vm/
+.vscode/
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini 
